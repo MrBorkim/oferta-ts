@@ -88,20 +88,92 @@ async function loadDocxBuffer(filePath) {
   return await fs.readFile(filePath);
 }
 
+// Funkcja naprawiająca rozdzielone tagi w XML
+// Word często rozbija {{placeholder}} na wiele elementów <w:t>
+function fixBrokenTags(xmlContent) {
+  // Usuń wszystkie tagi <w:proofErr>, <w:bookmarkStart>, <w:bookmarkEnd> które rozbijają placeholdery
+  xmlContent = xmlContent.replace(/<w:proofErr[^>]*\/>/g, '');
+  xmlContent = xmlContent.replace(/<w:bookmarkStart[^>]*\/>/g, '');
+  xmlContent = xmlContent.replace(/<w:bookmarkEnd[^>]*\/>/g, '');
+
+  // Scal elementy <w:t> które są obok siebie
+  // Pattern: </w:t></w:r><w:r><w:t> -> połącz zawartość
+  xmlContent = xmlContent.replace(/<\/w:t><\/w:r><w:r[^>]*><w:t[^>]*>/g, '');
+  xmlContent = xmlContent.replace(/<\/w:t><\/w:r><w:r><w:t>/g, '');
+
+  // Usuń puste elementy rPr (properties) między tekstami
+  xmlContent = xmlContent.replace(/<\/w:t><w:rPr[^>]*\/><w:t[^>]*>/g, '');
+  xmlContent = xmlContent.replace(/<\/w:t><w:rPr><\/w:rPr><w:t[^>]*>/g, '');
+
+  return xmlContent;
+}
+
+// Naprawa rozdzielonych tagów w całym ZIP (DOCX)
+function repairDocxTags(zip) {
+  // Pliki XML które mogą zawierać placeholdery
+  const xmlFiles = [
+    'word/document.xml',
+    'word/header1.xml',
+    'word/header2.xml',
+    'word/footer1.xml',
+    'word/footer2.xml'
+  ];
+
+  xmlFiles.forEach(fileName => {
+    try {
+      const content = zip.file(fileName);
+      if (content) {
+        let xmlContent = content.asText();
+        const fixedContent = fixBrokenTags(xmlContent);
+        zip.file(fileName, fixedContent);
+      }
+    } catch (err) {
+      // Plik nie istnieje, pomijamy
+    }
+  });
+
+  return zip;
+}
+
 // Przetwarzanie DOCX z placeholderami
 async function processDocxTemplate(templateBuffer, data) {
   try {
     const zip = new PizZip(templateBuffer);
-    const doc = new Docxtemplater(zip, {
+
+    // KLUCZOWE: Napraw rozdzielone tagi przed przetwarzaniem
+    // Word często rozbija {{placeholder}} na wiele elementów XML
+    const fixedZip = repairDocxTags(zip);
+
+    const doc = new Docxtemplater(fixedZip, {
       paragraphLoop: true,
       linebreaks: true,
-      nullGetter: () => ''
+      nullGetter: () => '',
+      delimiters: {
+        start: '{{',
+        end: '}}'
+      }
     });
 
     doc.render(data);
     return doc.getZip().generate({ type: 'nodebuffer' });
   } catch (err) {
-    console.error('Błąd przetwarzania DOCX:', err);
+    console.error('❌ Błąd przetwarzania DOCX:', err.message);
+
+    // Lepsze logowanie błędów
+    if (err.properties && err.properties.errors) {
+      console.error('\n📋 Szczegóły błędów:');
+      err.properties.errors.forEach((error, idx) => {
+        console.error(`  ${idx + 1}. ${error.message}`);
+        if (error.properties) {
+          console.error(`     🏷️  Tag: "${error.properties.xtag}"`);
+          console.error(`     📄 Plik: ${error.properties.file}`);
+          console.error(`     📍 Pozycja: ${error.properties.offset}`);
+        }
+      });
+      console.error('\n💡 Wskazówka: Sprawdź czy placeholdery w DOCX są poprawne.');
+      console.error('   Otwórz plik DOCX i upewnij się że {{tagi}} nie są rozbite przez formatowanie.\n');
+    }
+
     throw err;
   }
 }
