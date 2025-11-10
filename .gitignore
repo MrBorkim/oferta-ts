@@ -1,16 +1,30 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
-.venv
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Generated offers
+oferty/
+!oferty/.gitkeep
+
+# Static previews
+static-previews/
+!static-previews/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Environment variables
 .env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
 
 # IDE
 .vscode/
@@ -19,24 +33,7 @@ ENV/
 *.swo
 *~
 
-# OS
-.DS_Store
-Thumbs.db
-
 # Temporary files
-*.tmp
-*.temp
 tmp/
 temp/
-
-# Logs
-*.log
-logs/
-
-# Test outputs
-test_output/
-*.zip
-*.pdf
-*.jpg
-*.jpeg
-*.png
+*.tmp

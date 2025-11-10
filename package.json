@@ -1,0 +1,33 @@
+{
+  "name": "oferta-generator",
+  "version": "1.0.0",
+  "description": "System do generowania ofert z szablonów DOCX z podglądem w czasie rzeczywistym",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "setup": "node setup-unoserver.js"
+  },
+  "keywords": [
+    "docx",
+    "template",
+    "offer",
+    "generator"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "pizzip": "^3.1.6",
+    "docxtemplater": "^3.42.3",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1",
+    "archiver": "^6.0.1",
+    "uuid": "^9.0.1",
+    "pdf-lib": "^1.17.1",
+    "sharp": "^0.33.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
