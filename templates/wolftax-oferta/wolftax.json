@@ -1,0 +1,173 @@
+{
+  "name": "Szablon oferty WolfTax",
+  "description": "Profesjonalny wielostronicowy szablon oferty z osobnymi plikami DOCX dla każdej sekcji.",
+  "template_type": "multi_file",
+  "files": [
+    {"file": "Dok1.docx", "order": 1, "name": "Strona tytułowa"},
+    {"file": "Doc2.docx", "order": 2, "name": "Wprowadzenie"},
+    {"file": "doc3.docx", "order": 3, "name": "Spis treści"},
+    {"file": "doc4.docx", "order": 4, "name": "Podsumowanie"},
+    {"file": "Dok5.docx", "order": 5, "name": "Warunki"},
+    {"file": "Dok6.docx", "order": 6, "name": "Strona końcowa"}
+  ],
+  "injection_point": {
+    "type": "between_files",
+    "after": "doc3.docx",
+    "before": "doc4.docx",
+    "description": "Produkty są wstawiane między spisem treści a podsumowaniem"
+  },
+  "placeholders": {
+    "client_name": {
+      "label": "Nazwa klienta",
+      "type": "text",
+      "required": true,
+      "description": "Pełna nazwa firmy klienta"
+    },
+    "client_nip": {
+      "label": "NIP klienta",
+      "type": "text",
+      "required": true,
+      "pattern": "^[0-9]{10}$",
+      "description": "10-cyfrowy NIP bez kresek"
+    },
+    "client_address": {
+      "label": "Adres klienta",
+      "type": "text",
+      "required": false,
+      "description": "Pełny adres siedziby klienta"
+    },
+    "offer_date": {
+      "label": "Data oferty",
+      "type": "date",
+      "required": true,
+      "format": "DD.MM.YYYY",
+      "description": "Data wystawienia oferty"
+    },
+    "offer_number": {
+      "label": "Numer oferty",
+      "type": "text",
+      "required": true,
+      "description": "Unikalny numer oferty, np. OF/2024/001"
+    },
+    "valid_until": {
+      "label": "Oferta ważna do",
+      "type": "date",
+      "required": true,
+      "format": "DD.MM.YYYY",
+      "description": "Data ważności oferty"
+    },
+    "company_name": {
+      "label": "Nazwa Twojej firmy",
+      "type": "text",
+      "required": true,
+      "description": "Nazwa firmy wystawiającej ofertę"
+    },
+    "company_nip": {
+      "label": "NIP Twojej firmy",
+      "type": "text",
+      "required": false,
+      "pattern": "^[0-9]{10}$"
+    },
+    "company_address": {
+      "label": "Adres Twojej firmy",
+      "type": "text",
+      "required": false
+    },
+    "project_name": {
+      "label": "Nazwa projektu",
+      "type": "text",
+      "required": true,
+      "description": "Nazwa projektu lub tematu zlecenia"
+    },
+    "project_description": {
+      "label": "Opis projektu",
+      "type": "textarea",
+      "required": false,
+      "description": "Szczegółowy opis zakresu projektu"
+    },
+    "total_price": {
+      "label": "Cena całkowita (PLN)",
+      "type": "number",
+      "required": true,
+      "min": 0,
+      "description": "Całkowita wartość oferty w PLN"
+    },
+    "currency": {
+      "label": "Waluta",
+      "type": "text",
+      "required": false,
+      "default": "PLN",
+      "description": "Kod waluty (PLN, EUR, USD, etc.)"
+    },
+    "payment_terms": {
+      "label": "Warunki płatności",
+      "type": "text",
+      "required": false,
+      "default": "14 dni",
+      "description": "Termin płatności, np. '14 dni', '30 dni'"
+    },
+    "delivery_time": {
+      "label": "Czas realizacji",
+      "type": "text",
+      "required": false,
+      "description": "Przewidywany czas realizacji projektu"
+    },
+    "person_name": {
+      "label": "Imię i nazwisko osoby kontaktowej",
+      "type": "text",
+      "required": false,
+      "description": "Osoba odpowiedzialna za ofertę"
+    },
+    "person_email": {
+      "label": "Email osoby kontaktowej",
+      "type": "email",
+      "required": false
+    },
+    "person_phone": {
+      "label": "Telefon osoby kontaktowej",
+      "type": "text",
+      "required": false
+    },
+    "notes": {
+      "label": "Uwagi dodatkowe",
+      "type": "textarea",
+      "required": false,
+      "description": "Dodatkowe informacje i uwagi"
+    }
+  },
+  "products": {
+    "label": "Lista produktów/usług",
+    "type": "list",
+    "description": "Produkty będą wstawione między doc3.docx a doc4.docx",
+    "min": 1,
+    "max": 50,
+    "item_schema": {
+      "product_id": {
+        "label": "ID produktu",
+        "type": "text",
+        "required": true,
+        "description": "Unikalny identyfikator produktu (nazwa pliku DOCX bez rozszerzenia)"
+      },
+      "page": {
+        "label": "Numer strony",
+        "type": "number",
+        "required": false,
+        "default": 1,
+        "description": "Na której stronie oferty ma się pojawić produkt"
+      },
+      "slot": {
+        "label": "Slot pozycji",
+        "type": "text",
+        "required": false,
+        "default": "main",
+        "description": "Pozycja produktu na stronie (hero, main, grid_1, etc.)"
+      },
+      "sequence": {
+        "label": "Kolejność",
+        "type": "number",
+        "required": false,
+        "description": "Kolejność wyświetlania produktu"
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "product_id": "1",
+  "name": "Produkt 1",
+  "description": "Szablon produktu 1 z konfigurowalnymi placeholders",
+  "template_file": "1.docx",
+  "placeholders": {
+    "product_name": {
+      "label": "Nazwa produktu/usługi",
+      "type": "text",
+      "required": true,
+      "default": "Usługa 1"
+    },
+    "product_description": {
+      "label": "Opis produktu",
+      "type": "textarea",
+      "required": false,
+      "default": "Szczegółowy opis usługi"
+    },
+    "product_price": {
+      "label": "Cena jednostkowa (PLN)",
+      "type": "number",
+      "required": true,
+      "min": 0,
+      "default": 0
+    },
+    "quantity": {
+      "label": "Ilość",
+      "type": "number",
+      "required": false,
+      "default": 1,
+      "min": 1
+    },
+    "unit": {
+      "label": "Jednostka",
+      "type": "text",
+      "required": false,
+      "default": "szt.",
+      "description": "Jednostka miary (szt., godz., m.b., etc.)"
+    },
+    "total_price": {
+      "label": "Wartość całkowita (PLN)",
+      "type": "number",
+      "required": false,
+      "computed": true,
+      "formula": "product_price * quantity",
+      "description": "Automatycznie obliczana jako cena × ilość"
+    },
+    "features": {
+      "label": "Cechy produktu",
+      "type": "textarea",
+      "required": false,
+      "description": "Lista kluczowych cech produktu/usługi"
+    },
+    "image": {
+      "label": "Obraz produktu",
+      "type": "image",
+      "required": false,
+      "default": "cover.jpg",
+      "description": "Nazwa pliku obrazu w katalogu produktu"
+    }
+  }
+}

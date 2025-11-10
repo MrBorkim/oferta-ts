@@ -1,0 +1,88 @@
+{
+  "template": "oferta-podstawowa",
+  "placeholders": {
+    "KLIENT(NIP)": "1234567890",
+    "Oferta z dnia": "10.11.2024",
+    "waznado": "24.11.2024",
+    "firmaM": "AIDROPS Sp. z o.o.",
+    "temat": "Wdrożenie systemu CRM",
+    "kategoria": "IT / Cyfryzacja",
+    "opis": "Kompleksowe wdrożenie systemu CRM dla średniej firmy, obejmujące analizę procesów biznesowych, konfigurację systemu, migrację danych oraz szkolenie użytkowników.",
+    "cena": 45000,
+    "RBG": 120,
+    "uzasadnienie": "Szacowany nakład pracy: 120 roboczogodzin × 375 PLN/h = 45 000 PLN netto. Cena uwzględnia analizę przedwdrożeniową, konfigurację, migrację danych z poprzedniego systemu oraz szkolenie zespołu."
+  },
+  "products": [
+    {
+      "product_id": "1",
+      "page": 1,
+      "slot": "hero",
+      "sequence": 1,
+      "image": "1.docx",
+      "data": {
+        "product_name": "Analiza przedwdrożeniowa",
+        "product_description": "Szczegółowa analiza procesów biznesowych i wymagań klienta",
+        "product_price": 8000,
+        "quantity": 1,
+        "unit": "szt."
+      }
+    },
+    {
+      "product_id": "2",
+      "page": 1,
+      "slot": "main",
+      "sequence": 2,
+      "image": "2.docx",
+      "data": {
+        "product_name": "Konfiguracja systemu CRM",
+        "product_description": "Instalacja i konfiguracja systemu CRM zgodnie z wymaganiami",
+        "product_price": 15000,
+        "quantity": 1,
+        "unit": "szt."
+      }
+    },
+    {
+      "product_id": "3",
+      "page": 1,
+      "slot": "grid_1",
+      "sequence": 3,
+      "image": "3.docx",
+      "data": {
+        "product_name": "Migracja danych",
+        "product_description": "Import danych z poprzedniego systemu",
+        "product_price": 12000,
+        "quantity": 1,
+        "unit": "szt."
+      }
+    },
+    {
+      "product_id": "4",
+      "page": 1,
+      "slot": "grid_2",
+      "sequence": 4,
+      "image": "4.docx",
+      "data": {
+        "product_name": "Szkolenie użytkowników",
+        "product_description": "2-dniowe szkolenie dla zespołu (do 10 osób)",
+        "product_price": 5000,
+        "quantity": 1,
+        "unit": "szt."
+      }
+    },
+    {
+      "product_id": "5",
+      "page": 2,
+      "slot": "main",
+      "sequence": 5,
+      "image": "5.docx",
+      "data": {
+        "product_name": "Wsparcie pouwdrożeniowe",
+        "product_description": "3 miesiące wsparcia technicznego po wdrożeniu",
+        "product_price": 5000,
+        "quantity": 1,
+        "unit": "szt."
+      }
+    }
+  ],
+  "return_mode": "zip"
+}

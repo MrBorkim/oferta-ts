@@ -1,0 +1,147 @@
+{
+  "template": "wolftax-oferta",
+  "placeholders": {
+    "client_name": "WolfTax Sp. z o.o.",
+    "client_nip": "9876543210",
+    "client_address": "ul. Podatkowa 123, 00-001 Warszawa",
+    "offer_date": "10.11.2024",
+    "offer_number": "OF/2024/0045",
+    "valid_until": "10.12.2024",
+    "company_name": "AIDROPS Sp. z o.o.",
+    "company_nip": "1234567890",
+    "company_address": "ul. Innowacyjna 1, 00-100 Warszawa",
+    "project_name": "Kompleksowa automatyzacja procesów księgowych",
+    "project_description": "Wdrożenie zaawansowanego systemu automatyzacji procesów księgowych z integracją z systemami bankowymi, OCR faktur oraz raportowaniem w czasie rzeczywistym.",
+    "total_price": 125000,
+    "currency": "PLN",
+    "payment_terms": "30 dni od daty wystawienia faktury",
+    "delivery_time": "4 miesiące od podpisania umowy",
+    "person_name": "Jan Kowalski",
+    "person_email": "jan.kowalski@aidrops.pl",
+    "person_phone": "+48 123 456 789",
+    "notes": "Oferta obejmuje pełne wsparcie wdrożeniowe oraz 6 miesięcy bezpłatnego wsparcia technicznego. Cena nie zawiera VAT."
+  },
+  "products": [
+    {
+      "product_id": "1",
+      "page": 1,
+      "slot": "hero",
+      "sequence": 1,
+      "image": "1.docx",
+      "data": {
+        "product_name": "Moduł OCR - rozpoznawanie faktur",
+        "product_description": "Automatyczne rozpoznawanie i ekstrakcja danych z faktur przychodzących z wykorzystaniem AI",
+        "product_price": 25000,
+        "quantity": 1,
+        "unit": "szt.",
+        "features": "- Rozpoznawanie faktur w formacie PDF i zdjęcia\n- Automatyczna walidacja danych\n- Integracja z systemem księgowym\n- Uczenie maszynowe dla poprawy precyzji"
+      }
+    },
+    {
+      "product_id": "2",
+      "page": 1,
+      "slot": "main",
+      "sequence": 2,
+      "image": "2.docx",
+      "data": {
+        "product_name": "Integracja z systemami bankowymi",
+        "product_description": "Automatyczne pobieranie i księgowanie przelewów bankowych",
+        "product_price": 20000,
+        "quantity": 1,
+        "unit": "szt.",
+        "features": "- Obsługa standardu PSD2\n- Automatyczne pobieranie wyciągów\n- Rozpoznawanie kontrahentów\n- Sugerowanie dekretacji"
+      }
+    },
+    {
+      "product_id": "3",
+      "page": 2,
+      "slot": "grid_1",
+      "sequence": 3,
+      "image": "3.docx",
+      "data": {
+        "product_name": "Dashboard analityczny",
+        "product_description": "Panel raportowania w czasie rzeczywistym z kluczowymi wskaźnikami finansowymi",
+        "product_price": 18000,
+        "quantity": 1,
+        "unit": "szt.",
+        "features": "- Raporty w czasie rzeczywistym\n- Konfigurowalne KPI\n- Eksport do Excel/PDF\n- Alerty o ważnych zdarzeniach"
+      }
+    },
+    {
+      "product_id": "4",
+      "page": 2,
+      "slot": "grid_2",
+      "sequence": 4,
+      "image": "4.docx",
+      "data": {
+        "product_name": "Moduł workflow i akceptacji",
+        "product_description": "System obiegu dokumentów z wielopoziomowym systemem akceptacji",
+        "product_price": 22000,
+        "quantity": 1,
+        "unit": "szt.",
+        "features": "- Konfigurowalne ścieżki akceptacji\n- Powiadomienia email/SMS\n- Historia zmian\n- Integracja z Active Directory"
+      }
+    },
+    {
+      "product_id": "5",
+      "page": 3,
+      "slot": "main",
+      "sequence": 5,
+      "image": "5.docx",
+      "data": {
+        "product_name": "Szkolenia i wdrożenie",
+        "product_description": "Kompleksowe szkolenie zespołu księgowego oraz wsparcie podczas wdrożenia",
+        "product_price": 15000,
+        "quantity": 1,
+        "unit": "szt.",
+        "features": "- 5 dni szkoleń on-site\n- Materiały szkoleniowe\n- Dedykowany opiekun projektu\n- Wsparcie przez pierwsze 2 tygodnie"
+      }
+    },
+    {
+      "product_id": "6",
+      "page": 3,
+      "slot": "secondary",
+      "sequence": 6,
+      "image": "6.docx",
+      "data": {
+        "product_name": "Migracja danych historycznych",
+        "product_description": "Import danych z dotychczasowego systemu księgowego",
+        "product_price": 12000,
+        "quantity": 1,
+        "unit": "szt.",
+        "features": "- Import faktur z ostatnich 24 miesięcy\n- Import kontrahentów\n- Weryfikacja poprawności\n- Raport z migracji"
+      }
+    },
+    {
+      "product_id": "7",
+      "page": 4,
+      "slot": "main",
+      "sequence": 7,
+      "image": "7.docx",
+      "data": {
+        "product_name": "Wsparcie i utrzymanie (6 miesięcy)",
+        "product_description": "Bezpłatne wsparcie techniczne przez pierwsze 6 miesięcy",
+        "product_price": 0,
+        "quantity": 1,
+        "unit": "szt.",
+        "features": "- Helpdesk email/telefon\n- Aktualizacje systemu\n- Konsultacje z księgowymi\n- SLA 24h na odpowiedź"
+      }
+    },
+    {
+      "product_id": "8",
+      "page": 4,
+      "slot": "secondary",
+      "sequence": 8,
+      "image": "8.docx",
+      "data": {
+        "product_name": "Pakiet rozszerzeń (opcjonalnie)",
+        "product_description": "Dodatkowe moduły dostępne po wdrożeniu",
+        "product_price": 13000,
+        "quantity": 1,
+        "unit": "szt.",
+        "features": "- Moduł kadrowo-płacowy\n- Integracja z e-commerce\n- Aplikacja mobilna\n- API dla integracji zewnętrznych"
+      }
+    }
+  ],
+  "return_mode": "zip"
+}

@@ -1,0 +1,31 @@
+{
+  "template": "oferta-podstawowa",
+  "placeholders": {
+    "KLIENT(NIP)": "9999888877",
+    "Oferta z dnia": "10.11.2024",
+    "waznado": "17.11.2024",
+    "firmaM": "Quick Solutions Sp. z o.o.",
+    "temat": "Szybka oferta - tylko pierwsza strona",
+    "kategoria": "Konsulting IT",
+    "opis": "Ekspresowa oferta na konsultację IT. Zwracamy tylko pierwszą stronę jako obraz JPG.",
+    "cena": 5000,
+    "RBG": 20,
+    "uzasadnienie": "20 godzin × 250 PLN/h = 5 000 PLN"
+  },
+  "products": [
+    {
+      "product_id": "1",
+      "page": 1,
+      "slot": "hero",
+      "sequence": 1,
+      "data": {
+        "product_name": "Konsultacja IT",
+        "product_description": "Podstawowa konsultacja techniczna",
+        "product_price": 5000,
+        "quantity": 1,
+        "unit": "szt."
+      }
+    }
+  ],
+  "return_mode": "first_page_inline"
+}
