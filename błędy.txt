@@ -1,36 +1,15 @@
-node setup-unoserver.js && npm start
+npm install
+npm WARN deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm WARN deprecated glob@8.1.0: Glob versions prior to v9 are no longer supported
+npm WARN deprecated multer@1.4.5-lts.2: Multer 1.x is impacted by a number of vulnerabilities, which have been patched in 2.x. You should upgrade to the latest 2.x version.
 
-╔════════════════════════════════════════════════╗
-║   INSTALATOR UNOSERVER                        ║
-║   System: linux                               ║
-╚════════════════════════════════════════════════╝
+added 170 packages, and audited 171 packages in 17s
 
-Sprawdzanie wymaganych komponentów...
+26 packages are looking for funding
+  run `npm fund` for details
 
-✅ LibreOffice jest zainstalowany (libreoffice)
-✅ Unoserver jest zainstalowany: unoconvert 3.4
-✅ Poppler (pdftoppm) jest zainstalowany
-✅ PDFtk jest zainstalowany
-
-═══════════════════════════════════════════════
-
-✅ Wszystkie wymagane komponenty są zainstalowane!
-⚠️  PDFtk jest opcjonalny (tylko dla szablonów multi_file)
-
-═══════════════════════════════════════════════
-
-
-🚀 Próba uruchomienia Unoserver...
-✅ Unoserver już działa!
-
-═══════════════════════════════════════════════
-🎉 GOTOWE! Możesz uruchomić aplikację:
-   npm install
-   npm start
-
-   Aplikacja będzie dostępna na: http://localhost:3000
-═══════════════════════════════════════════════
-
+found 0 vulnerabilities
+root@vmi2899880:~/oferta-ts# npm start
 
 > oferta-generator@1.0.0 start
 > node server.js
