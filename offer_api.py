@@ -10,10 +10,12 @@ import json
 import subprocess
 import tempfile
 import shutil
+import re
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from io import BytesIO
 import zipfile
+from zipfile import ZipFile
 
 from fastapi import FastAPI, HTTPException, Header, Request
 from fastapi.responses import Response, StreamingResponse
@@ -170,6 +172,104 @@ def check_libreoffice() -> bool:
         return False
 
 
+def fix_jinja_tags_in_docx(docx_path: Path, output_path: Path) -> Path:
+    """
+    Naprawia rozbite tagi Jinja2 w pliku DOCX.
+
+    Word często rozbija tagi {{ variable }} na wiele node'ów XML podczas formatowania,
+    co powoduje błędy parsowania w docxtpl. Ta funkcja skleja rozbite tagi.
+
+    Args:
+        docx_path: Ścieżka do oryginalnego DOCX
+        output_path: Ścieżka do naprawionego DOCX
+
+    Returns:
+        Ścieżka do naprawionego pliku
+    """
+    try:
+        # DOCX to ZIP z plikami XML
+        with tempfile.TemporaryDirectory() as temp_extract:
+            temp_extract_path = Path(temp_extract)
+
+            # Rozpakuj DOCX
+            with ZipFile(docx_path, 'r') as zip_ref:
+                zip_ref.extractall(temp_extract_path)
+
+            # Napraw główny dokument
+            document_xml = temp_extract_path / "word" / "document.xml"
+            if document_xml.exists():
+                with open(document_xml, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                # Usuń tagi XML wewnątrz tagów Jinja {{ }} i {% %}
+                # Wzór: {{ cokolwiek z tagami XML }} -> {{ oczyszczona treść }}
+
+                # Pattern dla {{ ... }}
+                def clean_jinja_var(match):
+                    inner = match.group(1)
+                    # Usuń tagi XML <w:...> z wnętrza
+                    cleaned = re.sub(r'<[^>]+>', '', inner)
+                    return '{{' + cleaned + '}}'
+
+                # Pattern dla {% ... %}
+                def clean_jinja_tag(match):
+                    inner = match.group(1)
+                    cleaned = re.sub(r'<[^>]+>', '', inner)
+                    return '{%' + cleaned + '%}'
+
+                # Napraw tagi {{ }}
+                content = re.sub(r'\{\{([^}]*?)\}\}', clean_jinja_var, content, flags=re.DOTALL)
+
+                # Napraw tagi {% %}
+                content = re.sub(r'\{%([^%]*?)%\}', clean_jinja_tag, content, flags=re.DOTALL)
+
+                # Zapisz naprawiony XML
+                with open(document_xml, 'w', encoding='utf-8') as f:
+                    f.write(content)
+
+            # Napraw inne pliki XML w word/ (header, footer, etc.)
+            word_dir = temp_extract_path / "word"
+            for xml_file in word_dir.glob("*.xml"):
+                if xml_file.name != "document.xml":  # document.xml już naprawiony
+                    try:
+                        with open(xml_file, 'r', encoding='utf-8') as f:
+                            content = f.read()
+
+                        # Analogiczne czyszczenie
+                        def clean_jinja_var(match):
+                            inner = match.group(1)
+                            cleaned = re.sub(r'<[^>]+>', '', inner)
+                            return '{{' + cleaned + '}}'
+
+                        def clean_jinja_tag(match):
+                            inner = match.group(1)
+                            cleaned = re.sub(r'<[^>]+>', '', inner)
+                            return '{%' + cleaned + '%}'
+
+                        content = re.sub(r'\{\{([^}]*?)\}\}', clean_jinja_var, content, flags=re.DOTALL)
+                        content = re.sub(r'\{%([^%]*?)%\}', clean_jinja_tag, content, flags=re.DOTALL)
+
+                        with open(xml_file, 'w', encoding='utf-8') as f:
+                            f.write(content)
+                    except Exception:
+                        # Jeśli któryś plik się nie uda, kontynuuj
+                        pass
+
+            # Zapakuj z powrotem do DOCX
+            with ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zip_ref:
+                for file_path in temp_extract_path.rglob('*'):
+                    if file_path.is_file():
+                        arcname = file_path.relative_to(temp_extract_path)
+                        zip_ref.write(file_path, arcname)
+
+        return output_path
+
+    except Exception as e:
+        # Jeśli naprawa się nie uda, zwróć oryginalny plik
+        shutil.copy(docx_path, output_path)
+        return output_path
+
+
 def prepare_context(placeholders: Dict[str, Any], products: List[ProductItem]) -> Dict[str, Any]:
     """
     Przygotowuje kontekst dla docxtpl.
@@ -183,7 +283,7 @@ def prepare_context(placeholders: Dict[str, Any], products: List[ProductItem]) -
     # Przygotuj listę produktów z absolutnymi ścieżkami do obrazów
     products_list = []
     for product in products:
-        product_dict = product.dict()
+        product_dict = product.model_dump()
 
         # Znajdź obraz produktu
         product_dir = PRODUCTS_ROOT / product.product_id
@@ -241,8 +341,12 @@ def render_template(template_path: Path, context: Dict[str, Any], tmpdir: Path) 
     if not main_docx:
         main_docx = docx_files[0]
 
+    # Napraw rozbite tagi Jinja2 w DOCX
+    fixed_docx = tmpdir / f"fixed_{main_docx.name}"
+    fixed_docx = fix_jinja_tags_in_docx(main_docx, fixed_docx)
+
     # Renderuj szablon
-    doc = DocxTemplate(main_docx)
+    doc = DocxTemplate(fixed_docx)
 
     # Dodaj funkcję InlineImage do kontekstu
     def create_inline_image(image_path: str, width_mm: int = 120):
@@ -256,9 +360,17 @@ def render_template(template_path: Path, context: Dict[str, Any], tmpdir: Path) 
 
     # Renderuj
     try:
-        doc.render(context)
+        doc.render(context, autoescape=False)
     except Exception as e:
-        raise ValueError(f"Error rendering template with docxtpl: {str(e)}")
+        error_msg = f"Error rendering template with docxtpl: {str(e)}\n\n"
+        error_msg += "Possible causes:\n"
+        error_msg += "1. Broken Jinja2 tags in DOCX (Word formatting split {{ }} or {% %} tags)\n"
+        error_msg += "2. Missing variables in context\n"
+        error_msg += "3. Syntax errors in Jinja2 expressions\n"
+        error_msg += f"4. Template file: {main_docx.name}\n"
+        error_msg += "\nTip: Open the DOCX in Word, find Jinja tags like {{ variable }}, "
+        error_msg += "delete them completely, and retype them without any formatting."
+        raise ValueError(error_msg)
 
     # Zapisz wyrenderowany DOCX
     output_path = tmpdir / "rendered.docx"
