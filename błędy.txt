@@ -1,0 +1,134 @@
+node setup-unoserver.js && npm start
+
+╔════════════════════════════════════════════════╗
+║   INSTALATOR UNOSERVER                        ║
+║   System: linux                               ║
+╚════════════════════════════════════════════════╝
+
+Sprawdzanie wymaganych komponentów...
+
+✅ LibreOffice jest zainstalowany (libreoffice)
+✅ Unoserver jest zainstalowany: unoconvert 3.4
+✅ Poppler (pdftoppm) jest zainstalowany
+✅ PDFtk jest zainstalowany
+
+═══════════════════════════════════════════════
+
+✅ Wszystkie wymagane komponenty są zainstalowane!
+⚠️  PDFtk jest opcjonalny (tylko dla szablonów multi_file)
+
+═══════════════════════════════════════════════
+
+
+🚀 Próba uruchomienia Unoserver...
+✅ Unoserver już działa!
+
+═══════════════════════════════════════════════
+🎉 GOTOWE! Możesz uruchomić aplikację:
+   npm install
+   npm start
+
+   Aplikacja będzie dostępna na: http://localhost:3000
+═══════════════════════════════════════════════
+
+
+> oferta-generator@1.0.0 start
+> node server.js
+
+
+╔════════════════════════════════════════════════╗
+║   🚀 GENERATOR OFERT - URUCHOMIONY            ║
+╠════════════════════════════════════════════════╣
+║   Serwer działa na: http://localhost:3000     ║
+║   Panel główny: http://localhost:3000/        ║
+╠════════════════════════════════════════════════╣
+║   Foldery:                                     ║
+║   - Szablony: ./templates                      ║
+║   - Produkty: ./produkty                       ║
+║   - Oferty: ./oferty                           ║
+╚════════════════════════════════════════════════╝
+    
+{
+  "error": [
+    {
+      "name": "TemplateError",
+      "message": "Duplicate open tag, expected one open tag",
+      "stack": "Error: Duplicate open tag, expected one open tag\n    at new XTTemplateError (/root/oferta-ts/node_modules/docxtemplater/js/errors.js:21:16)\n    at getDuplicateOpenTagException (/root/oferta-ts/node_modules/docxtemplater/js/errors.js:83:13)\n    at /root/oferta-ts/node_modules/docxtemplater/js/lexer.js:136:23\n    at Array.reduce (<anonymous>)\n    at getDelimiterErrors (/root/oferta-ts/node_modules/docxtemplater/js/lexer.js:126:46)\n    at parseDelimiters (/root/oferta-ts/node_modules/docxtemplater/js/lexer.js:333:29)\n    at Object.parse (/root/oferta-ts/node_modules/docxtemplater/js/lexer.js:424:28)\n    at XmlTemplater.preparse (/root/oferta-ts/node_modules/docxtemplater/js/xml-templater.js:124:32)\n    at Docxtemplater.precompileFile (/root/oferta-ts/node_modules/docxtemplater/js/docxtemplater.js:409:19)\n    at Docxtemplater.compile (/root/oferta-ts/node_modules/docxtemplater/js/docxtemplater.js:511:16)",
+      "properties": {
+        "xtag": "{{Ofer",
+        "id": "duplicate_open_tag",
+        "context": "{{Ofer",
+        "offset": 584,
+        "explanation": "The tag beginning with \"{{Ofer\" has duplicate open tags",
+        "file": "word/document.xml"
+      }
+    },
+    {
+      "name": "TemplateError",
+      "message": "Duplicate close tag, expected one close tag",
+      "stack": "Error: Duplicate close tag, expected one close tag\n    at new XTTemplateError (/root/oferta-ts/node_modules/docxtemplater/js/errors.js:21:16)\n    at getDuplicateCloseTagException (/root/oferta-ts/node_modules/docxtemplater/js/errors.js:95:13)\n    at /root/oferta-ts/node_modules/docxtemplater/js/lexer.js:166:21\n    at Array.reduce (<anonymous>)\n    at getDelimiterErrors (/root/oferta-ts/node_modules/docxtemplater/js/lexer.js:126:46)\n    at parseDelimiters (/root/oferta-ts/node_modules/docxtemplater/js/lexer.js:333:29)\n    at Object.parse (/root/oferta-ts/node_modules/docxtemplater/js/lexer.js:424:28)\n    at XmlTemplater.preparse (/root/oferta-ts/node_modules/docxtemplater/js/xml-templater.js:124:32)\n    at Docxtemplater.precompileFile (/root/oferta-ts/node_modules/docxtemplater/js/docxtemplater.js:409:19)\n    at Docxtemplater.compile (/root/oferta-ts/node_modules/docxtemplater/js/docxtemplater.js:511:16)",
+      "properties": {
+        "xtag": "erta}}",
+        "id": "duplicate_close_tag",
+        "context": "erta}}",
+        "offset": 592,
+        "explanation": "The tag ending with \"erta}}\" has duplicate close tags",
+        "file": "word/document.xml"
+      }
+    },
+    {
+      "name": "TemplateError",
+      "message": "Duplicate open tag, expected one open tag",
+      "stack": "Error: Duplicate open tag, expected one open tag\n    at new XTTemplateError (/root/oferta-ts/node_modules/docxtemplater/js/errors.js:21:16)\n    at getDuplicateOpenTagException (/root/oferta-ts/node_modules/docxtemplater/js/errors.js:83:13)\n    at /root/oferta-ts/node_modules/docxtemplater/js/lexer.js:136:23\n    at Array.reduce (<anonymous>)\n    at getDelimiterErrors (/root/oferta-ts/node_modules/docxtemplater/js/lexer.js:126:46)\n    at parseDelimiters (/root/oferta-ts/node_modules/docxtemplater/js/lexer.js:333:29)\n    at Object.parse (/root/oferta-ts/node_modules/docxtemplater/js/lexer.js:424:28)\n    at XmlTemplater.preparse (/root/oferta-ts/node_modules/docxtemplater/js/xml-templater.js:124:32)\n    at Docxtemplater.precompileFile (/root/oferta-ts/node_modules/docxtemplater/js/docxtemplater.js:409:19)\n    at Docxtemplater.compile (/root/oferta-ts/node_modules/docxtemplater/js/docxtemplater.js:511:16)",
+      "properties": {
+        "xtag": "{{Ofer",
+        "id": "duplicate_open_tag",
+        "context": "{{Ofer",
+        "offset": 826,
+        "explanation": "The tag beginning with \"{{Ofer\" has duplicate open tags",
+        "file": "word/document.xml"
+      }
+    },
+    {
+      "name": "TemplateError",
+      "message": "Duplicate close tag, expected one close tag",
+      "stack": "Error: Duplicate close tag, expected one close tag\n    at new XTTemplateError (/root/oferta-ts/node_modules/docxtemplater/js/errors.js:21:16)\n    at getDuplicateCloseTagException (/root/oferta-ts/node_modules/docxtemplater/js/errors.js:95:13)\n    at /root/oferta-ts/node_modules/docxtemplater/js/lexer.js:166:21\n    at Array.reduce (<anonymous>)\n    at getDelimiterErrors (/root/oferta-ts/node_modules/docxtemplater/js/lexer.js:126:46)\n    at parseDelimiters (/root/oferta-ts/node_modules/docxtemplater/js/lexer.js:333:29)\n    at Object.parse (/root/oferta-ts/node_modules/docxtemplater/js/lexer.js:424:28)\n    at XmlTemplater.preparse (/root/oferta-ts/node_modules/docxtemplater/js/xml-templater.js:124:32)\n    at Docxtemplater.precompileFile (/root/oferta-ts/node_modules/docxtemplater/js/docxtemplater.js:409:19)\n    at Docxtemplater.compile (/root/oferta-ts/node_modules/docxtemplater/js/docxtemplater.js:511:16)",
+      "properties": {
+        "xtag": "erta}}",
+        "id": "duplicate_close_tag",
+        "context": "erta}}",
+        "offset": 834,
+        "explanation": "The tag ending with \"erta}}\" has duplicate close tags",
+        "file": "word/document.xml"
+      }
+    }
+  ]
+}
+Błąd przetwarzania DOCX: Error: Multi error
+    at new XTTemplateError (/root/oferta-ts/node_modules/docxtemplater/js/errors.js:21:16)
+    at throwMultiError (/root/oferta-ts/node_modules/docxtemplater/js/errors.js:62:13)
+    at verifyErrors (/root/oferta-ts/node_modules/docxtemplater/js/docxtemplater.js:210:5)
+    at Docxtemplater.compile (/root/oferta-ts/node_modules/docxtemplater/js/docxtemplater.js:534:7)
+    at new Docxtemplater (/root/oferta-ts/node_modules/docxtemplater/js/docxtemplater.js:250:12)
+    at processDocxTemplate (/root/oferta-ts/server.js:95:17)
+    at /root/oferta-ts/server.js:346:33 {
+  properties: {
+    errors: [ [Error], [Error], [Error], [Error] ],
+    id: 'multi_error',
+    explanation: 'The template has multiple errors'
+  }
+}
+Błąd generowania: Error: Multi error
+    at new XTTemplateError (/root/oferta-ts/node_modules/docxtemplater/js/errors.js:21:16)
+    at throwMultiError (/root/oferta-ts/node_modules/docxtemplater/js/errors.js:62:13)
+    at verifyErrors (/root/oferta-ts/node_modules/docxtemplater/js/docxtemplater.js:210:5)
+    at Docxtemplater.compile (/root/oferta-ts/node_modules/docxtemplater/js/docxtemplater.js:534:7)
+    at new Docxtemplater (/root/oferta-ts/node_modules/docxtemplater/js/docxtemplater.js:250:12)
+    at processDocxTemplate (/root/oferta-ts/server.js:95:17)
+    at /root/oferta-ts/server.js:346:33 {
+  properties: {
+    errors: [ [Error], [Error], [Error], [Error] ],
+    id: 'multi_error',
+    explanation: 'The template has multiple errors'
+  }
+}
