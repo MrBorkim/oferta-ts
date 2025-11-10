@@ -88,20 +88,124 @@ async function loadDocxBuffer(filePath) {
   return await fs.readFile(filePath);
 }
 
+// Funkcja naprawiająca rozdzielone tagi w XML
+// Word często rozbija {{placeholder}} na wiele elementów <w:t>
+function fixBrokenTags(xmlContent) {
+  // KROK 1: Usuń wszystkie elementy które rozbijają placeholdery
+  xmlContent = xmlContent.replace(/<w:proofErr[^>]*\/>/g, '');
+  xmlContent = xmlContent.replace(/<w:bookmarkStart[^>]*\/>/g, '');
+  xmlContent = xmlContent.replace(/<w:bookmarkEnd[^>]*\/>/g, '');
+  xmlContent = xmlContent.replace(/<w:noBreakHyphen\/>/g, '');
+  xmlContent = xmlContent.replace(/<w:softHyphen\/>/g, '');
+
+  // KROK 2: Ekstrahuj wszystkie elementy <w:t> i połącz te które tworzą tag
+  // Znajdź wszystkie paragrafyy <w:p>...</w:p>
+  xmlContent = xmlContent.replace(/<w:p\b[^>]*>([\s\S]*?)<\/w:p>/g, (match, paragraphContent) => {
+    // Wyciągnij całą zawartość tekstową z paragrafu
+    let textParts = [];
+    let tempContent = paragraphContent;
+
+    // Znajdź wszystkie <w:t>...</w:t>
+    const textMatches = tempContent.matchAll(/<w:t[^>]*>(.*?)<\/w:t>/g);
+    for (const textMatch of textMatches) {
+      textParts.push(textMatch[1]);
+    }
+
+    // Połącz wszystkie teksty
+    const fullText = textParts.join('');
+
+    // Jeśli zawiera placeholdery, uprość strukturę
+    if (fullText.includes('{{') || fullText.includes('}}')) {
+      // Znajdź pierwszy <w:r> i zastąp całą zawartość jednym tekstem
+      const firstRun = paragraphContent.match(/<w:r\b[^>]*>/);
+      if (firstRun) {
+        const cleanedParagraph = paragraphContent.replace(
+          /<w:r\b[^>]*>[\s\S]*?<\/w:r>/g,
+          (firstMatch, offset) => {
+            if (offset === paragraphContent.indexOf(firstRun[0])) {
+              // Pierwszy <w:r> - wstaw cały tekst
+              return `<w:r><w:t>${fullText}</w:t></w:r>`;
+            }
+            // Usuń pozostałe <w:r>
+            return '';
+          }
+        );
+        return `<w:p${match.match(/<w:p\b([^>]*)>/)[1]}>${cleanedParagraph}</w:p>`;
+      }
+    }
+
+    return match;
+  });
+
+  return xmlContent;
+}
+
+// Naprawa rozdzielonych tagów w całym ZIP (DOCX)
+function repairDocxTags(zip) {
+  // Pliki XML które mogą zawierać placeholdery
+  const xmlFiles = [
+    'word/document.xml',
+    'word/header1.xml',
+    'word/header2.xml',
+    'word/footer1.xml',
+    'word/footer2.xml'
+  ];
+
+  xmlFiles.forEach(fileName => {
+    try {
+      const content = zip.file(fileName);
+      if (content) {
+        let xmlContent = content.asText();
+        const fixedContent = fixBrokenTags(xmlContent);
+        zip.file(fileName, fixedContent);
+      }
+    } catch (err) {
+      // Plik nie istnieje, pomijamy
+    }
+  });
+
+  return zip;
+}
+
 // Przetwarzanie DOCX z placeholderami
 async function processDocxTemplate(templateBuffer, data) {
   try {
     const zip = new PizZip(templateBuffer);
-    const doc = new Docxtemplater(zip, {
+
+    // KLUCZOWE: Napraw rozdzielone tagi przed przetwarzaniem
+    // Word często rozbija {{placeholder}} na wiele elementów XML
+    const fixedZip = repairDocxTags(zip);
+
+    const doc = new Docxtemplater(fixedZip, {
       paragraphLoop: true,
       linebreaks: true,
-      nullGetter: () => ''
+      nullGetter: () => '',
+      delimiters: {
+        start: '{{',
+        end: '}}'
+      }
     });
 
     doc.render(data);
     return doc.getZip().generate({ type: 'nodebuffer' });
   } catch (err) {
-    console.error('Błąd przetwarzania DOCX:', err);
+    console.error('❌ Błąd przetwarzania DOCX:', err.message);
+
+    // Lepsze logowanie błędów
+    if (err.properties && err.properties.errors) {
+      console.error('\n📋 Szczegóły błędów:');
+      err.properties.errors.forEach((error, idx) => {
+        console.error(`  ${idx + 1}. ${error.message}`);
+        if (error.properties) {
+          console.error(`     🏷️  Tag: "${error.properties.xtag}"`);
+          console.error(`     📄 Plik: ${error.properties.file}`);
+          console.error(`     📍 Pozycja: ${error.properties.offset}`);
+        }
+      });
+      console.error('\n💡 Wskazówka: Sprawdź czy placeholdery w DOCX są poprawne.');
+      console.error('   Otwórz plik DOCX i upewnij się że {{tagi}} nie są rozbite przez formatowanie.\n');
+    }
+
     throw err;
   }
 }
