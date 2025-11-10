@@ -172,77 +172,57 @@ function repairDocxTags(zip) {
 
 // Przetwarzanie DOCX z placeholderami
 async function processDocxTemplate(templateBuffer, data) {
+  // STRATEGIA: Używamy prostego zastępowania tekstu
+  // Nasze pliki DOCX mają bardzo rozdzielone/zduplikowane tagi, więc docxtemplater nie działa
+
+  console.log('📝 Przetwarzanie DOCX metodą prostego zastępowania...');
+
   try {
     const zip = new PizZip(templateBuffer);
+    const docXml = zip.file('word/document.xml');
 
-    // KLUCZOWE: Napraw rozdzielone tagi przed przetwarzaniem
-    const fixedZip = repairDocxTags(zip);
+    if (!docXml) {
+      throw new Error('Brak word/document.xml w pliku DOCX');
+    }
 
-    // Użyj docxtemplater bez parsera - pozwól mu samemu sobie radzić
-    const doc = new Docxtemplater(fixedZip, {
-      paragraphLoop: true,
-      linebreaks: true,
-      nullGetter: () => ''
-    });
+    let xmlContent = docXml.asText();
 
-    doc.render(data);
-    return doc.getZip().generate({ type: 'nodebuffer' });
-  } catch (err) {
-    console.error('❌ Błąd przetwarzania DOCX:', err.message);
+    // Zastąp każdy placeholder wartością
+    for (const [key, value] of Object.entries(data)) {
+      if (value === null || value === undefined) continue;
 
-    // Jeśli błąd parsowania - spróbuj prostym zastępowaniem tekstu
-    if (err.properties && err.properties.id === 'multi_error') {
-      console.log('⚙️  Próba prostego zastępowania tekstu...');
+      const stringValue = String(value);
 
-      try {
-        // Fallback: proste zastępowanie w XML
-        const zip2 = new PizZip(templateBuffer);
-        const docXml = zip2.file('word/document.xml');
+      // Wszystkie możliwe warianty tagu (rozbite, ze spacjami, etc.)
+      const variants = [
+        `{{${key}}}`,           // normalny
+        `{{ ${key} }}`,         // ze spacjami
+        `{{  ${key}  }}`,       // z większymi spacjami
+        `{${key}}`,             // brakujący {
+        `${key}}}`,             // brakujący {{
+        `{{${key}`,             // brakujący }}
+      ];
 
-        if (docXml) {
-          let xmlContent = docXml.asText();
-
-          // Zastąp każdy placeholder wartością
-          for (const [key, value] of Object.entries(data)) {
-            // Spróbuj różnych wariantów
-            const variants = [
-              `{{${key}}}`,
-              `{{ ${key} }}`,
-              `{{  ${key}  }}`,
-              `{${key}}`, // brakujący jeden {
-              `${key}}}`,  // brakujący {{
-              `{{${key}`,   // brakujący }}
-            ];
-
-            for (const variant of variants) {
-              const regex = new RegExp(variant.replace(/[{}]/g, '\\$&'), 'g');
-              xmlContent = xmlContent.replace(regex, String(value || ''));
-            }
-          }
-
-          zip2.file('word/document.xml', xmlContent);
-          return zip2.generate({ type: 'nodebuffer' });
+      for (const variant of variants) {
+        // Escape special regex characters
+        const escaped = variant.replace(/[{}]/g, '\\$&');
+        const regex = new RegExp(escaped, 'g');
+        const matches = xmlContent.match(regex);
+        if (matches) {
+          console.log(`   ✓ Zastępuję "${variant}" → "${stringValue}" (${matches.length}x)`);
+          xmlContent = xmlContent.replace(regex, stringValue);
         }
-      } catch (fallbackErr) {
-        console.error('❌ Fallback również nie powiódł się:', fallbackErr.message);
       }
     }
 
-    // Logowanie błędów
-    if (err.properties && err.properties.errors) {
-      console.error('\n📋 Szczegóły błędów:');
-      err.properties.errors.forEach((error, idx) => {
-        console.error(`  ${idx + 1}. ${error.message}`);
-        if (error.properties) {
-          console.error(`     🏷️  Tag: "${error.properties.xtag}"`);
-          console.error(`     📄 Plik: ${error.properties.file}`);
-          console.error(`     📍 Pozycja: ${error.properties.offset}`);
-        }
-      });
-      console.error('\n💡 Wskazówka: Plik DOCX ma niepoprawne tagi.');
-      console.error('   Otwórz plik w Word i popraw placeholdery {{}}.\n');
-    }
+    // Zaktualizuj plik XML w ZIP
+    zip.file('word/document.xml', xmlContent);
 
+    console.log('✅ Dokument przetworzony pomyślnie');
+    return zip.generate({ type: 'nodebuffer' });
+
+  } catch (err) {
+    console.error('❌ Błąd przetwarzania DOCX:', err.message);
     throw err;
   }
 }
