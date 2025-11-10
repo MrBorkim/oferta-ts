@@ -10,43 +10,58 @@ const fs = require('fs');
 const path = require('path');
 
 function fixBrokenTagsAdvanced(xmlContent) {
-  // Usuń wszystkie elementy które rozbijają tagi
+  // KROK 1: Usuń wszystkie elementy które rozbijają tagi
   xmlContent = xmlContent.replace(/<w:proofErr[^>]*\/>/g, '');
   xmlContent = xmlContent.replace(/<w:bookmarkStart[^>]*\/>/g, '');
   xmlContent = xmlContent.replace(/<w:bookmarkEnd[^>]*\/>/g, '');
   xmlContent = xmlContent.replace(/<w:noBreakHyphen\/>/g, '');
+  xmlContent = xmlContent.replace(/<w:softHyphen\/>/g, '');
 
-  // Znajdź wszystkie paragrafy i scal <w:t> elementy
-  xmlContent = xmlContent.replace(/<w:p\b[^>]*>[\s\S]*?<\/w:p>/g, (paragraph) => {
+  // KROK 2: Scal wszystkie <w:t> elementy w ramach jednego paragrafu
+  xmlContent = xmlContent.replace(/<w:p\b([^>]*)>([\s\S]*?)<\/w:p>/g, (fullMatch, pAttrs, pContent) => {
     // Sprawdź czy zawiera {{ lub }}
-    if (!paragraph.includes('{{') && !paragraph.includes('}}')) {
-      return paragraph;
+    if (!pContent.includes('{{') && !pContent.includes('}}')) {
+      return fullMatch;
     }
 
-    // Ekstrahuj wszystkie teksty z <w:t>
-    const texts = [];
-    const textRegex = /<w:t[^>]*>(.*?)<\/w:t>/g;
-    let match;
-    while ((match = textRegex.exec(paragraph)) !== null) {
-      texts.push(match[1]);
+    // Ekstrahuj wszystkie <w:r> bloki
+    const runs = [];
+    const runRegex = /<w:r\b([^>]*)>([\s\S]*?)<\/w:r>/g;
+    let runMatch;
+
+    while ((runMatch = runRegex.exec(pContent)) !== null) {
+      const runAttrs = runMatch[1];
+      const runContent = runMatch[2];
+
+      // Wyciągnij wszystkie teksty z <w:t>
+      const texts = [];
+      const textRegex = /<w:t[^>]*>([\s\S]*?)<\/w:t>/g;
+      let textMatch;
+
+      while ((textMatch = textRegex.exec(runContent)) !== null) {
+        texts.push(textMatch[1]);
+      }
+
+      runs.push({
+        attrs: runAttrs,
+        text: texts.join(''),
+        original: runMatch[0]
+      });
     }
 
-    // Połącz wszystkie teksty
-    const fullText = texts.join('');
+    // Połącz wszystkie teksty ze wszystkich runs
+    const allText = runs.map(r => r.text).join('');
 
-    // Znajdź strukturę paragrafu bez <w:r> elementów
-    const beforeRuns = paragraph.match(/^<w:p\b[^>]*>[\s\S]*?(?=<w:r\b)/);
-    const afterRuns = paragraph.match(/<\/w:r>[\s\S]*?<\/w:p>$/);
+    // Znajdź elementy przed runs (np. <w:pPr>)
+    const beforeRuns = pContent.match(/^[\s\S]*?(?=<w:r\b)/);
+    const before = beforeRuns ? beforeRuns[0] : '';
 
-    if (beforeRuns && afterRuns) {
-      // Zbuduj nowy paragraf z jednym <w:r> i jednym <w:t>
-      const before = beforeRuns[0];
-      const after = afterRuns[0].replace(/<\/w:r>/, '');
+    // Znajdź elementy po runs
+    const afterRunsMatch = pContent.match(/<\/w:r>([\s\S]*)$/);
+    const after = afterRunsMatch ? afterRunsMatch[1] : '';
 
-      return `${before}<w:r><w:t xml:space="preserve">${fullText}</w:t></w:r>${after}`;
-    }
-
-    return paragraph;
+    // Zbuduj nowy paragraf z jednym run i jednym text
+    return `<w:p${pAttrs}>${before}<w:r><w:t xml:space="preserve">${allText}</w:t></w:r>${after}</w:p>`;
   });
 
   return xmlContent;
