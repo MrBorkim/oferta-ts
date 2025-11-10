@@ -91,19 +91,51 @@ async function loadDocxBuffer(filePath) {
 // Funkcja naprawiająca rozdzielone tagi w XML
 // Word często rozbija {{placeholder}} na wiele elementów <w:t>
 function fixBrokenTags(xmlContent) {
-  // Usuń wszystkie tagi <w:proofErr>, <w:bookmarkStart>, <w:bookmarkEnd> które rozbijają placeholdery
+  // KROK 1: Usuń wszystkie elementy które rozbijają placeholdery
   xmlContent = xmlContent.replace(/<w:proofErr[^>]*\/>/g, '');
   xmlContent = xmlContent.replace(/<w:bookmarkStart[^>]*\/>/g, '');
   xmlContent = xmlContent.replace(/<w:bookmarkEnd[^>]*\/>/g, '');
+  xmlContent = xmlContent.replace(/<w:noBreakHyphen\/>/g, '');
+  xmlContent = xmlContent.replace(/<w:softHyphen\/>/g, '');
 
-  // Scal elementy <w:t> które są obok siebie
-  // Pattern: </w:t></w:r><w:r><w:t> -> połącz zawartość
-  xmlContent = xmlContent.replace(/<\/w:t><\/w:r><w:r[^>]*><w:t[^>]*>/g, '');
-  xmlContent = xmlContent.replace(/<\/w:t><\/w:r><w:r><w:t>/g, '');
+  // KROK 2: Ekstrahuj wszystkie elementy <w:t> i połącz te które tworzą tag
+  // Znajdź wszystkie paragrafyy <w:p>...</w:p>
+  xmlContent = xmlContent.replace(/<w:p\b[^>]*>([\s\S]*?)<\/w:p>/g, (match, paragraphContent) => {
+    // Wyciągnij całą zawartość tekstową z paragrafu
+    let textParts = [];
+    let tempContent = paragraphContent;
 
-  // Usuń puste elementy rPr (properties) między tekstami
-  xmlContent = xmlContent.replace(/<\/w:t><w:rPr[^>]*\/><w:t[^>]*>/g, '');
-  xmlContent = xmlContent.replace(/<\/w:t><w:rPr><\/w:rPr><w:t[^>]*>/g, '');
+    // Znajdź wszystkie <w:t>...</w:t>
+    const textMatches = tempContent.matchAll(/<w:t[^>]*>(.*?)<\/w:t>/g);
+    for (const textMatch of textMatches) {
+      textParts.push(textMatch[1]);
+    }
+
+    // Połącz wszystkie teksty
+    const fullText = textParts.join('');
+
+    // Jeśli zawiera placeholdery, uprość strukturę
+    if (fullText.includes('{{') || fullText.includes('}}')) {
+      // Znajdź pierwszy <w:r> i zastąp całą zawartość jednym tekstem
+      const firstRun = paragraphContent.match(/<w:r\b[^>]*>/);
+      if (firstRun) {
+        const cleanedParagraph = paragraphContent.replace(
+          /<w:r\b[^>]*>[\s\S]*?<\/w:r>/g,
+          (firstMatch, offset) => {
+            if (offset === paragraphContent.indexOf(firstRun[0])) {
+              // Pierwszy <w:r> - wstaw cały tekst
+              return `<w:r><w:t>${fullText}</w:t></w:r>`;
+            }
+            // Usuń pozostałe <w:r>
+            return '';
+          }
+        );
+        return `<w:p${match.match(/<w:p\b([^>]*)>/)[1]}>${cleanedParagraph}</w:p>`;
+      }
+    }
+
+    return match;
+  });
 
   return xmlContent;
 }

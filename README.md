@@ -265,6 +265,23 @@ Otwórz w przeglądarce: **http://localhost:3000**
 - `GET /api/offers/:id/download?format=docx|pdf` - Pobieranie
 - `DELETE /api/offers/:id` - Usuwanie oferty
 
+## 🔧 Naprawa szablonów DOCX
+
+Jeśli widzisz błędy typu "Duplicate open tag" lub "Duplicate close tag":
+
+### Automatyczna naprawa wszystkich szablonów
+```bash
+node fix-all-templates.js
+```
+
+### Naprawa pojedynczego pliku
+```bash
+node fix-docx-tags.js templates/oferta-podstawowa/oferta1.docx
+```
+
+**Problem:** Word często rozbija placeholdery `{{placeholder}}` na wiele elementów XML podczas edycji.
+**Rozwiązanie:** Nasze narzędzie automatycznie łączy rozdzielone tagi.
+
 ## 🐛 Rozwiązywanie problemów
 
 ### Unoserver nie działa
