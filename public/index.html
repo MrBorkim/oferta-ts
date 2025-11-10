@@ -920,11 +920,31 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Pokaż podgląd PDF
-                    container.innerHTML = `
-                        <iframe src="${data.pdfPath}" class="preview-pdf"></iframe>
-                    `;
-                    showAlert('Podgląd wygenerowany!', 'success');
+                    // Pokaż podgląd
+                    if (data.pdfPath) {
+                        // PDF dostępny - pokaż podgląd PDF
+                        container.innerHTML = `
+                            <iframe src="${data.pdfPath}" class="preview-pdf"></iframe>
+                        `;
+                        showAlert('Podgląd wygenerowany!', 'success');
+                    } else {
+                        // PDF niedostępny - pokaż link do DOCX
+                        container.innerHTML = `
+                            <div class="preview-placeholder">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 80px; height: 80px; color: var(--primary);">
+                                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <h3>✅ Dokument wygenerowany!</h3>
+                                <p style="color: var(--text-light); margin-top: 1rem;">
+                                    ${data.message || 'Dokument DOCX jest gotowy'}
+                                </p>
+                                <a href="${data.docxPath}" target="_blank" class="btn btn-primary" style="margin-top: 1.5rem; text-decoration: none;">
+                                    📄 Otwórz DOCX
+                                </a>
+                            </div>
+                        `;
+                        showAlert(data.message || 'Dokument wygenerowany (DOCX)', 'info');
+                    }
                 } else {
                     showAlert(data.error || 'Błąd generowania podglądu', 'error');
                     container.innerHTML = '<div class="preview-placeholder"><p>Błąd generowania podglądu</p></div>';
