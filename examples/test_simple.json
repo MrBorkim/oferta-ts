@@ -1,0 +1,21 @@
+{
+  "template": "oferta-podstawowa",
+  "placeholders": {
+    "KLIENT(NIP)": "1234567890",
+    "Oferta z dnia": "10.11.2024",
+    "waznado": "24.11.2024",
+    "firmaM": "Test Firma Sp. z o.o.",
+    "temat": "Testowa oferta",
+    "kategoria": "IT",
+    "opis": "Testowy opis projektu",
+    "cena": 10000,
+    "RBG": 40,
+    "uzasadnienie": "Testowe uzasadnienie",
+    "cenausluga1": 5000,
+    "iloscroboczogodzinusluga1": 20,
+    "CENA": 5000,
+    "CENA2": 5000
+  },
+  "products": [],
+  "return_mode": "first_page_inline"
+}

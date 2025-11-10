@@ -442,11 +442,11 @@ def convert_pdf_to_jpg(pdf_path: Path, tmpdir: Path, dpi: int = 100, quality: in
             matrix = fitz.Matrix(zoom, zoom)
             pix = page.get_pixmap(matrix=matrix, alpha=False)
 
-            # Konwertuj pixmap → PIL Image → JPEG z DPI
-            img_data = pix.tobytes("jpeg", quality=quality)
-            img = Image.open(BytesIO(img_data))
+            # Konwertuj pixmap → PIL Image
+            # pix.samples to raw bytes RGB, więc używamy Image.frombytes
+            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
-            # Zapisz z metadanymi DPI
+            # Zapisz jako JPEG z odpowiednią jakością i DPI
             jpg_path = tmpdir / f"page_{page_num + 1:03d}.jpg"
             img.save(jpg_path, "JPEG", quality=quality, dpi=(dpi, dpi))
 
