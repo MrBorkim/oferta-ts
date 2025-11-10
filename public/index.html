@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Ofert - System zarządzania szablonami</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--surface);
+            border-bottom: 2px solid var(--border);
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .main-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Modal dla wyboru szablonu */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .template-card {
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--surface);
+        }
+
+        .template-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .template-card.selected {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .template-card h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .template-card p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Layout dwupanelowy */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .panel {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        .panel-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .panel-header h2 {
+            font-size: 1.3rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Formularz - lewa strona */
+        .form-section {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #f1f5f9;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .section-header:hover {
+            background: #e2e8f0;
+        }
+
+        .section-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .section-toggle {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            transition: transform 0.2s;
+        }
+
+        .section-header.collapsed .section-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 1.5rem;
+            display: block;
+        }
+
+        .section-content.collapsed {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group.required label::after {
+            content: " *";
+            color: var(--danger);
+        }
+
+        /* Produkty */
+        .products-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .product-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fafafa;
+        }
+
+        .product-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .product-item label {
+            flex: 1;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        /* Podgląd - prawa strona */
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .preview-placeholder {
+            text-align: center;
+            color: var(--text-light);
+            padding: 3rem;
+        }
+
+        .preview-placeholder svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .preview-pdf {
+            width: 100%;
+            height: 600px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        /* Przyciski */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--border);
+        }
+
+        /* Alert */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert.active {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #2563eb;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                height: auto;
+            }
+        }
+
+        .offer-name-input {
+            margin-bottom: 1.5rem;
+        }
+
+        .current-template {
+            background: #eff6ff;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .current-template strong {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1>📄 Generator Ofert</h1>
+            <div class="header-actions">
+                <button class="btn btn-outline" onclick="showTemplateModal()">
+                    Nowa Oferta
+                </button>
+                <button class="btn btn-secondary" onclick="loadOffers()">
+                    Moje Oferty
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="alert alert-info" id="alert">
+            Wybierz szablon i rozpocznij tworzenie oferty.
+        </div>
+
+        <!-- Modal wyboru szablonu -->
+        <div class="modal" id="templateModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Wybierz szablon oferty</h2>
+                    <p style="color: var(--text-light);">Wybierz szablon, który chcesz użyć do utworzenia nowej oferty</p>
+                </div>
+
+                <div class="offer-name-input">
+                    <label for="offerNameInput">Nazwa oferty:</label>
+                    <input type="text" id="offerNameInput" placeholder="np. Oferta dla Klienta XYZ" />
+                </div>
+
+                <div class="template-grid" id="templateGrid">
+                    <!-- Szablony będą ładowane dynamicznie -->
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="createOffer()">
+                        Utwórz ofertę
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeTemplateModal()">
+                        Anuluj
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workspace -->
+        <div class="workspace" id="workspace" style="display: none;">
+            <!-- Lewa strona - Formularz -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>⚙️ Dane oferty</h2>
+                </div>
+
+                <div class="current-template" id="currentTemplateInfo">
+                    <strong>Szablon:</strong> <span id="templateName">-</span>
+                </div>
+
+                <div id="formContainer">
+                    <!-- Formularz będzie generowany dynamicznie -->
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="generatePreview()">
+                        🔄 Generuj podgląd
+                    </button>
+                    <button class="btn btn-primary" onclick="downloadOffer('docx')">
+                        💾 Pobierz DOCX
+                    </button>
+                    <button class="btn btn-primary" onclick="downloadOffer('pdf')">
+                        📄 Pobierz PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Prawa strona - Podgląd -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>👁️ Podgląd dokumentu</h2>
+                </div>
+
+                <div class="loading" id="previewLoading">
+                    <div class="spinner"></div>
+                    <p>Generowanie podglądu...</p>
+                </div>
+
+                <div class="preview-container" id="previewContainer">
+                    <div class="preview-placeholder">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h3>Podgląd dokumentu</h3>
+                        <p>Wypełnij dane i kliknij "Generuj podgląd"<br>aby zobaczyć dokument</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Stan aplikacji
+        let state = {
+            templates: [],
+            selectedTemplate: null,
+            currentOffer: null,
+            products: [],
+            formData: {},
+            selectedProducts: []
+        };
+
+        // Inicjalizacja
+        async function init() {
+            await loadTemplates();
+            await loadProducts();
+        }
+
+        // Ładowanie szablonów
+        async function loadTemplates() {
+            try {
+                const response = await fetch('/api/templates');
+                const data = await response.json();
+
+                if (data.success) {
+                    state.templates = data.templates;
+                    console.log('Załadowano szablony:', state.templates);
+                }
+            } catch (err) {
+                console.error('Błąd ładowania szablonów:', err);
+                showAlert('Błąd ładowania szablonów', 'error');
+            }
+        }
+
+        // Ładowanie produktów
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products');
+                const data = await response.json();
+
+                if (data.success) {
+                    state.products = data.products;
+                    console.log('Załadowano produkty:', state.products);
+                }
+            } catch (err) {
+                console.error('Błąd ładowania produktów:', err);
+            }
+        }
+
+        // Pokazanie modala wyboru szablonu
+        function showTemplateModal() {
+            const modal = document.getElementById('templateModal');
+            const grid = document.getElementById('templateGrid');
+
+            grid.innerHTML = '';
+
+            state.templates.forEach(template => {
+                const card = document.createElement('div');
+                card.className = 'template-card';
+                card.onclick = () => selectTemplate(template.id);
+                card.innerHTML = `
+                    <h3>${template.name}</h3>
+                    <p>${template.description}</p>
+                    <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-light);">
+                        Typ: ${template.type === 'single_file' ? 'Jednoplikowy' : 'Wielostronicowy'}
+                    </p>
+                `;
+                card.dataset.templateId = template.id;
+                grid.appendChild(card);
+            });
+
+            modal.classList.add('active');
+        }
+
+        function closeTemplateModal() {
+            document.getElementById('templateModal').classList.remove('active');
+        }
+
+        function selectTemplate(templateId) {
+            state.selectedTemplate = templateId;
+
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            document.querySelector(`[data-template-id="${templateId}"]`).classList.add('selected');
+        }
+
+        // Tworzenie nowej oferty
+        async function createOffer() {
+            const offerName = document.getElementById('offerNameInput').value.trim();
+
+            if (!offerName) {
+                showAlert('Podaj nazwę oferty', 'error');
+                return;
+            }
+
+            if (!state.selectedTemplate) {
+                showAlert('Wybierz szablon', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/offers/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        offerName,
+                        templateId: state.selectedTemplate
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    state.currentOffer = data.offerId;
+                    closeTemplateModal();
+                    await loadOfferWorkspace();
+                    showAlert('Oferta utworzona pomyślnie!', 'success');
+                } else {
+                    showAlert(data.error || 'Błąd tworzenia oferty', 'error');
+                }
+            } catch (err) {
+                console.error('Błąd:', err);
+                showAlert('Błąd tworzenia oferty', 'error');
+            }
+        }
+
+        // Ładowanie workspace dla oferty
+        async function loadOfferWorkspace() {
+            try {
+                const response = await fetch(`/api/templates/${state.selectedTemplate}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const template = data.template;
+
+                    // Aktualizuj info o szablonie
+                    document.getElementById('templateName').textContent = template.name;
+
+                    // Generuj formularz
+                    generateForm(template);
+
+                    // Pokaż workspace
+                    document.getElementById('workspace').style.display = 'grid';
+                }
+            } catch (err) {
+                console.error('Błąd ładowania workspace:', err);
+                showAlert('Błąd ładowania formularza', 'error');
+            }
+        }
+
+        // Generowanie formularza na podstawie konfiguracji szablonu
+        function generateForm(template) {
+            const container = document.getElementById('formContainer');
+            container.innerHTML = '';
+
+            const placeholders = template.placeholders || {};
+
+            // Grupuj placeholdery według logicznych sekcji
+            const sections = {
+                'Dane podstawowe': ['KLIENT(NIP)', 'firmaM', 'Oferta z dnia', 'waznado'],
+                'Szczegóły zlecenia': ['temat', 'kategoria', 'opis'],
+                'Finansowe': ['cena', 'RBG', 'uzasadnienie'],
+                'Produkty': ['produkty']
+            };
+
+            for (const [sectionName, fields] of Object.entries(sections)) {
+                const section = createFormSection(sectionName, fields, placeholders);
+                container.appendChild(section);
+            }
+        }
+
+        function createFormSection(sectionName, fieldNames, placeholders) {
+            const section = document.createElement('div');
+            section.className = 'form-section';
+
+            const header = document.createElement('div');
+            header.className = 'section-header';
+            header.innerHTML = `
+                <h3>${sectionName}</h3>
+                <span class="section-toggle">▼</span>
+            `;
+            header.onclick = () => toggleSection(header);
+
+            const content = document.createElement('div');
+            content.className = 'section-content';
+
+            fieldNames.forEach(fieldName => {
+                const config = placeholders[fieldName];
+                if (!config) return;
+
+                if (config.type === 'list_of_docx') {
+                    // Produkty - specjalna sekcja
+                    const productsDiv = createProductsSection();
+                    content.appendChild(productsDiv);
+                } else {
+                    const formGroup = createFormField(fieldName, config);
+                    content.appendChild(formGroup);
+                }
+            });
+
+            section.appendChild(header);
+            section.appendChild(content);
+
+            return section;
+        }
+
+        function createFormField(fieldName, config) {
+            const group = document.createElement('div');
+            group.className = 'form-group';
+            if (config.required) group.classList.add('required');
+
+            const label = document.createElement('label');
+            label.textContent = config.label;
+            label.htmlFor = `field_${fieldName}`;
+
+            let input;
+
+            if (config.type === 'textarea') {
+                input = document.createElement('textarea');
+                input.rows = 4;
+            } else if (config.type === 'date') {
+                input = document.createElement('input');
+                input.type = 'date';
+            } else if (config.type === 'number') {
+                input = document.createElement('input');
+                input.type = 'number';
+            } else {
+                input = document.createElement('input');
+                input.type = 'text';
+            }
+
+            input.id = `field_${fieldName}`;
+            input.dataset.fieldName = fieldName;
+            input.oninput = () => updateFormData(fieldName, input.value);
+
+            if (config.required) {
+                input.required = true;
+            }
+
+            group.appendChild(label);
+            group.appendChild(input);
+
+            return group;
+        }
+
+        function createProductsSection() {
+            const div = document.createElement('div');
+            div.innerHTML = '<label style="margin-bottom: 1rem; display: block; font-weight: 600;">Wybierz produkty:</label>';
+
+            const productsList = document.createElement('div');
+            productsList.className = 'products-list';
+
+            state.products.forEach(product => {
+                const item = document.createElement('div');
+                item.className = 'product-item';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `product_${product.id}`;
+                checkbox.value = product.id;
+                checkbox.onchange = (e) => {
+                    if (e.target.checked) {
+                        state.selectedProducts.push(product.id);
+                    } else {
+                        state.selectedProducts = state.selectedProducts.filter(id => id !== product.id);
+                    }
+                };
+
+                const label = document.createElement('label');
+                label.htmlFor = `product_${product.id}`;
+                label.textContent = product.name;
+
+                item.appendChild(checkbox);
+                item.appendChild(label);
+                productsList.appendChild(item);
+            });
+
+            div.appendChild(productsList);
+            return div;
+        }
+
+        function toggleSection(header) {
+            header.classList.toggle('collapsed');
+            const content = header.nextElementSibling;
+            content.classList.toggle('collapsed');
+        }
+
+        function updateFormData(fieldName, value) {
+            state.formData[fieldName] = value;
+            autoSave();
+        }
+
+        // Auto-zapis danych
+        let autoSaveTimeout;
+        async function autoSave() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(async () => {
+                if (!state.currentOffer) return;
+
+                try {
+                    await fetch(`/api/offers/${state.currentOffer}/update`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            data: state.formData,
+                            selectedProducts: state.selectedProducts
+                        })
+                    });
+                } catch (err) {
+                    console.error('Błąd auto-zapisu:', err);
+                }
+            }, 1000);
+        }
+
+        // Generowanie podglądu
+        async function generatePreview() {
+            if (!state.currentOffer) return;
+
+            const loading = document.getElementById('previewLoading');
+            const container = document.getElementById('previewContainer');
+
+            loading.classList.add('active');
+            container.innerHTML = '';
+
+            try {
+                const response = await fetch(`/api/offers/${state.currentOffer}/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        changedPages: [] // TODO: implementacja śledzenia zmian
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Pokaż podgląd PDF
+                    container.innerHTML = `
+                        <iframe src="${data.pdfPath}" class="preview-pdf"></iframe>
+                    `;
+                    showAlert('Podgląd wygenerowany!', 'success');
+                } else {
+                    showAlert(data.error || 'Błąd generowania podglądu', 'error');
+                    container.innerHTML = '<div class="preview-placeholder"><p>Błąd generowania podglądu</p></div>';
+                }
+            } catch (err) {
+                console.error('Błąd generowania podglądu:', err);
+                showAlert('Błąd generowania podglądu', 'error');
+                container.innerHTML = '<div class="preview-placeholder"><p>Błąd generowania podglądu</p></div>';
+            } finally {
+                loading.classList.remove('active');
+            }
+        }
+
+        // Pobieranie oferty
+        function downloadOffer(format) {
+            if (!state.currentOffer) return;
+
+            const url = `/api/offers/${state.currentOffer}/download?format=${format}`;
+            window.open(url, '_blank');
+        }
+
+        // Lista ofert
+        async function loadOffers() {
+            // TODO: implementacja listy ofert
+            showAlert('Funkcja w przygotowaniu', 'info');
+        }
+
+        // Alert system
+        function showAlert(message, type = 'info') {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type} active`;
+            alert.textContent = message;
+
+            setTimeout(() => {
+                alert.classList.remove('active');
+            }, 5000);
+        }
+
+        // Inicjalizacja po załadowaniu strony
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
